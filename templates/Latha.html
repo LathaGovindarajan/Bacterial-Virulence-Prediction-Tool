@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bacterial Virulence Prediction Tool</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #6f00ff48;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+        }
+        header img {
+            vertical-align: middle;
+        }
+        header h1 {
+            display: inline;
+            margin-left: 20px;
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        nav {
+            background-color: #343a40;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        nav a:hover, .active {
+            background-color: #007bff;
+            color: #fff;
+        }
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .tab-content {
+            padding: 20px;
+        }
+        .tab-pane {
+            padding: 20px;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .form-container {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-container label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-container input[type="text"],
+        .form-container input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-container input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #resultsTable td a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        #resultsTable td a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header onclick="toggleMain()">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="BVP" width="100" height="100">
+        <h1>Bacterial Virulence Prediction Tool</h1>
+    </header>
+    <nav>
+        <a href="#user-input" onclick="showSection('user-input')">Analysis</a>
+        <a href="#results" onclick="showSection('results')">Results</a>
+        <a href="#about" onclick="showSection('about')">About</a>
+    </nav>
+    <main id="mainContent">
+        <section id="user-input">
+            <h2>Upload FASTA File</h2>
+            <form id="sequenceForm" enctype="multipart/form-data">
+                <div class="form-container">
+                    <label for="file">Upload FASTA File:</label>
+                    <input type="file" id="file" name="file" accept=".fasta">
+                </div>
+                <input type="submit" value="Submit">
+            </form>
+            <div id="processingMessage" style="display: none; margin-top: 20px; font-size: 16px; color: #007bff;">Your request is being processed, please wait...</div>
+            <div id="results"></div>
+        </section>
+        <section id="results" style="display: none;">
+            <h2>Results</h2>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Prediction</th>
+                        <th>Virulent Parts</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </section>
+        <section id="about" style="display: none;">
+            <h2>About</h2>
+            <p>Welcome to our protein sequence analysis tool! This web application is designed to help researchers and scientists analyze protein sequences and extract valuable features from them. Our tool takes in a protein sequence as input by uploading a file. The sequence is then processed and split into individual sequences. Each sequence is checked for invalid characters and then processed using the iFeature script to extract various features such as AAC, DPC, CTDC, and CTDT. The extracted features are then used to make predictions using a trained machine learning model. The predictions are generated in the form of a feature matrix, which is then converted into a downloadable.</p>
+            <h3>Features</h3>
+            <ul>
+                <li>Sequence Analysis: Analyze protein sequences and extract valuable features from them.</li>
+                <li>Feature Extraction: Extract features such as AAC, DPC, CTDC, and CTDT using iFeature script.</li>
+                <li>Machine Learning Predictions: Make predictions using a trained machine learning model.</li>
+                <li>Downloadable Results: Download the prediction results in a convenient Excel file format.</li>
+            </ul>
+            <h3>Technology Stack</h3>
+            <ul>
+                <li>Flask: A micro web framework for Python.</li>
+                <li>Python: A programming language for data analysis and machine learning tasks.</li>
+                <li>iFeature: A script for extracting features from protein sequences.</li>
+                <li>OpenPyXL: A library for working with Excel files in Python.</li>
+                <li>Joblib: A library for loading and saving machine learning models in Python.</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        function toggleMain() {
+            var mainContent = document.getElementById("mainContent");
+            if (mainContent.style.display === "none") {
+                mainContent.style.display = "block";
+            } else {
+                mainContent.style.display = "none";
+            }
+        }
+
+        function showSection(sectionId) {
+            var sections = document.querySelectorAll('main section');
+            sections.forEach(function(section) {
+                if (section.id === sectionId) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            var mainContent = document.getElementById("mainContent");
+            mainContent.style.display = "block";
+        }
+
+        document.getElementById('sequenceForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            document.getElementById('processingMessage').style.display = 'block';
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('file').files[0];
+
+            if (fileInput) {
+                formData.append('file', fileInput);
+            } else {
+                alert('Please upload a FASTA file.');
+                document.getElementById('processingMessage').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('processingMessage').style.display = 'none';
+                    const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+                    resultsTable.innerHTML = '';
+
+                    if (result.status === 'success') {
+                        result.predictions.forEach((item, index) => {
+                            const row = resultsTable.insertRow();
+                            row.insertCell(0).textContent = item.header;
+                            row.insertCell(1).textContent = item.prediction;
+                            row.insertCell(2).textContent = item.virulent_parts.join(', ');
+                            const downloadCell = row.insertCell(3);
+                            downloadCell.innerHTML = `<a href="/download/prediction_results.xlsx" target="_blank">Download</a>`;
+                        });
+                    } else {
+                        const row = resultsTable.insertRow();
+                        row.insertCell(0).textContent = 'N/A';
+                        row.insertCell(1).textContent = 'N/A';
+                        row.insertCell(2).textContent = 'Error';
+                        row.insertCell(3).textContent = result.message;
+                    }
+
+                    showSection('results');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('processingMessage').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
